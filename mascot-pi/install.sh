@@ -8,6 +8,11 @@ if [[ $EUID -ne 0 ]]; then echo "Run with sudo:  sudo bash install.sh"; exit 1; 
 if ! id mascot >/dev/null 2>&1; then echo "User 'mascot' not found. This script expects the user 'mascot'."; exit 1; fi
 cd "$APP"
 
+echo "== System libraries MediaPipe needs (missing on Raspberry Pi OS Lite)"
+if ! dpkg -s libegl1 libgles2 >/dev/null 2>&1; then
+  apt-get install -y --no-install-recommends libegl1 libgles2
+fi
+
 echo "== Checking files"
 for f in mascot_meter.py mascot_cloud.py mascot.service face_landmarker.task venv/bin/python; do
   [[ -e "$f" ]] || { echo "MISSING: $APP/$f"; exit 1; }

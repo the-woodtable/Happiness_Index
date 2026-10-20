@@ -1,0 +1,15 @@
+[Unit]
+Description=Mascot Wi-Fi setup hotspot (captive portal)
+After=NetworkManager.service
+Wants=NetworkManager.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/lib/mascot/mascot_wifi.py
+Environment=PYTHONUNBUFFERED=1
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
