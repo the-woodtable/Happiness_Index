@@ -1,0 +1,28 @@
+[Unit]
+Description=Mascot engagement + happiness meter
+After=time-sync.target
+Wants=time-sync.target
+# keep retrying forever (never give up after repeated crashes)
+StartLimitIntervalSec=0
+
+[Service]
+Type=notify
+NotifyAccess=main
+User=mascot
+Group=mascot
+SupplementaryGroups=video render
+WorkingDirectory=/home/mascot/mascot
+EnvironmentFile=-/etc/mascot/firebase.env
+EnvironmentFile=-/etc/mascot/meter.env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/mascot/mascot/venv/bin/python /home/mascot/mascot/mascot_meter.py --data-dir /home/mascot/mascot/data $MASCOT_ARGS
+Restart=always
+RestartSec=5
+# the program pings systemd every few seconds; if it freezes for 60 s it is killed and restarted
+WatchdogSec=60
+TimeoutStartSec=60
+TimeoutStopSec=20
+Nice=-5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mascot Happiness Index</title>
+<meta name="theme-color" content="#4f3a97">
+<style>
+:root{--purple:#4f3a97;--yellow:#fed200;--white:#fff;--pale:#ece4f4}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:#fff;color:var(--purple);font:16px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+[hidden]{display:none!important}
+.wrap{max-width:520px;margin:0 auto}
+header{background:var(--purple);color:#fff;border-bottom:4px solid var(--yellow)}
+header .wrap{padding:14px 16px 12px}
+h1{margin:0 0 8px;font-size:20px;line-height:1.2}
+.status{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-weight:700;background:#fff;color:var(--purple)}
+.pill::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--purple)}
+.pill.live{background:var(--yellow)}
+.pill.live::before{animation:pulse 1.6s infinite}
+.pill.offline{background:#d9d9d9;color:#444}
+.pill.offline::before{background:#777}
+@keyframes pulse{50%{opacity:.25}}
+.banner{background:var(--pale);border-left:5px solid var(--purple);padding:10px 16px;font-weight:600}
+.picker{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--pale)}
+.picker label{font-weight:700;font-size:14px}
+.picker select{flex:1;min-width:0;font:inherit;color:var(--purple);border:2px solid var(--purple);border-radius:8px;padding:6px 8px;background:#fff}
+.hbar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--yellow);padding:8px 16px;font-weight:700}
+.hbar button{font:inherit;font-weight:700;background:var(--purple);color:#fff;border:0;border-radius:8px;padding:6px 12px;cursor:pointer}
+h2{margin:0;background:var(--purple);color:#fff;font-size:15px;letter-spacing:.05em;text-transform:uppercase;padding:8px 16px}
+.body{padding:14px 16px}
+.label{font-weight:700}
+.sub{font-size:13px;margin-bottom:6px}
+.stat{display:flex;align-items:baseline;gap:8px}
+.stat .big{font-size:60px;font-weight:800;line-height:1}
+.stat .of{font-size:24px}
+.stat .pct{margin-left:auto;font-size:36px}
+.big-total{font-size:80px;font-weight:800;line-height:1}
+.stat.sm .big{font-size:44px}
+.stat.sm .of{font-size:18px}
+.stat.sm .pct{font-size:26px}
+hr{border:0;border-top:3px solid var(--yellow);margin:14px 0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.k{font-size:13px;min-height:2.7em}
+.v{font-size:24px;font-weight:800}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.row .v{font-size:28px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;margin-bottom:6px}
+.legend i{display:inline-block;width:16px;height:4px;border-radius:2px;margin-right:6px;vertical-align:middle}
+svg{display:block;width:100%;height:auto}
+footer{padding:16px;font-size:12px}
+body.offline main{opacity:.55}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Mascot Happiness Index</h1>
+    <div class="status" aria-live="polite">
+      <span id="pill" class="pill">Connecting…</span>
+      <span id="updated"></span>
+    </div>
+  </div>
+</header>
+<div id="offlineBanner" class="banner" hidden>
+  <div class="wrap">Camera offline. Showing the last data received; it updates again when the camera reconnects.</div>
+</div>
+<div class="wrap picker">
+  <label for="dayPicker">View</label>
+  <select id="dayPicker"><option value="">Live (today)</option></select>
+</div>
+<div id="histBar" class="hbar" hidden>
+  <span id="histLabel"></span>
+  <button id="backLive" type="button">Back to live</button>
+</div>
+
+<main class="wrap">
+  <section>
+    <h2>Engagement</h2>
+    <div class="body">
+      <div class="label">Number of people engaged</div>
+      <div class="sub" id="staySub">Stopped to look for 5 seconds +</div>
+      <div class="stat" data-stat="stayed"></div>
+      <hr>
+      <div class="two">
+        <div><div class="k">Median eye contact time</div><div class="v" id="eye">--</div></div>
+        <div><div class="k">Median reaction time</div><div class="v" id="reaction">--</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Happiness</h2>
+    <div class="body">
+      <div class="two">
+        <div><div class="label">Number of smiles</div><div class="stat sm" data-stat="smiles"></div></div>
+        <div><div class="label">Number of laughs</div><div class="stat sm" data-stat="laughs"></div></div>
+      </div>
+      <hr>
+      <div class="two">
+        <div><div class="k">Median time to happiness</div><div class="v" id="tts">--</div></div>
+        <div><div class="k">Median duration of happiness</div><div class="v" id="duration">--</div></div>
+      </div>
+      <hr>
+      <div class="row"><span>Average happiness (out of 100)</span><span class="v" id="happiness">--</span></div>
+      <hr>
+      <div class="label">Total Happiness Index</div>
+      <div class="sub">% of people smiled * average happiness, out of 100</div>
+      <div class="big-total" id="totalHappiness">--</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Shock</h2>
+    <div class="body">
+      <div class="label">Number of people scared / surprised</div>
+      <div class="stat sm" data-stat="shocked"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Over time</h2>
+    <div class="body">
+      <div class="legend" id="legend"></div>
+      <svg id="graph" viewBox="0 0 360 230" role="img" aria-label="Number of people engaged, smiled and laughed over the day"></svg>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  Numbers only. No images or video are recorded or shown. Times are Singapore time; a new day starts at 4:00 am.
+</footer>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
